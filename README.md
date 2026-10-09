@@ -22,18 +22,18 @@ Durchsucht eine Milliarde Nachkommastellen von π nach Wörtern, Namen und Zahle
 | Datei | Inhalt | Format |
 | --- | --- | --- |
 | `data/10/*.bin` | 1.000.000.000 Dezimalstellen | 6 Mio. Stellen pro Block, je 3 Ziffern in 10 Bit |
-| `data/26/*.bin` | 70.669.000 Basis-26-Stellen | 4 Mio. Buchstaben pro Block, je 5 Bit |
+| `data/26/*.bin` | 70.672.699 Basis-26-Stellen | 4 Mio. Buchstaben pro Block, je 5 Bit |
 | `data/meta.json` | Längen und Blockgrößen | |
 
 So werden sie erzeugt:
 
 ```bash
 y-cruncher custom pi -dec:1b -hex:0 -o build/yc -C:0 -verify:1 -mode:ram
-node scripts/generate.mjs 100000000
+node scripts/base26.mjs "build/yc/Pi - Dec - Chudnovsky.txt" 100000000
 node scripts/pack.mjs --dec "build/yc/Pi - Dec - Chudnovsky.txt" --b26 build/pi-26.txt
 ```
 
-`generate.mjs` rechnet π selbst per Chudnovsky (für Basis 26 und als Gegenprobe zu y-cruncher), `pack.mjs` packt beides in Blöcke.
+`base26.mjs` rechnet die ersten 100 Mio. Dezimalstellen exakt ins 26er-System um, `pack.mjs` packt beides in Blöcke.
 
 ## Lokal starten
 
