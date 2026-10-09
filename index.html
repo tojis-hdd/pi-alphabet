@@ -4,35 +4,41 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>π Alphabet</title>
-  <meta name="description" content="Verwandle eine Million Nachkommastellen von π in Buchstaben und finde deinen Namen darin.">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>π</text></svg>">
+  <meta name="description" content="Eine Milliarde Nachkommastellen von π als Buchstaben durchsuchen.">
+  <meta name="theme-color" content="#0b0b0d">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230f0f0f'/><text x='50' y='72' font-size='64' text-anchor='middle' fill='%237c8ff6' font-family='monospace' font-weight='700'>π</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <canvas id="sky" aria-hidden="true"></canvas>
+  <canvas id="backdrop" aria-hidden="true"></canvas>
 
   <div id="loader" class="loader">
-    <div class="loader-pi">π</div>
+    <div class="loader-mark">π</div>
     <div class="loader-bar"><span id="loader-fill"></span></div>
-    <div class="loader-text" id="loader-text">Lade 1.000.000 Nachkommastellen …</div>
+    <div class="loader-text" id="loader-text">Lade π …</div>
   </div>
 
   <header class="hero">
-    <p class="eyebrow">eine Million Nachkommastellen · drei Alphabete · unendlich viele Wörter</p>
-    <h1 class="title"><span class="title-pi">π</span> Alphabet</h1>
+    <div class="badge"><span class="badge-dot"></span><span id="badge-text">1.000.000.000 Nachkommastellen</span></div>
+    <h1 class="title">π <span>Alphabet</span></h1>
     <div class="hero-stream" id="hero-stream" aria-hidden="true"></div>
     <p class="lede">Irgendwo in den Ziffern von π steht dein Name. Vielleicht. Finde es heraus.</p>
   </header>
 
   <main>
-    <section class="panel control" id="control">
+    <section class="panel" id="control">
+      <div class="panel-head">
+        <h2>Suche</h2>
+        <span class="sub">Taste <kbd>/</kbd> zum Fokussieren</span>
+      </div>
+
       <form class="search" id="search-form" autocomplete="off">
         <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <input id="query" type="text" placeholder="Wort oder Zahl suchen …" maxlength="24" spellcheck="false" aria-label="Suchbegriff">
-        <button type="submit" class="search-go">Suchen</button>
+        <input id="query" type="text" placeholder="Wort oder Zahl suchen" maxlength="24" spellcheck="false" aria-label="Suchbegriff">
+        <button type="submit" class="btn-accent">Suchen</button>
       </form>
 
       <div class="chips" id="chips"></div>
@@ -41,34 +47,36 @@
         <div class="field">
           <div class="field-head">
             <label for="places">Nachkommastellen</label>
-            <output id="places-out">100.000</output>
+            <output id="places-out">1.000.000</output>
           </div>
-          <input id="places" type="range" min="0" max="1000" value="750" class="slider">
-          <div class="ticks">
-            <button type="button" data-places="100">100</button>
-            <button type="button" data-places="1000">1K</button>
-            <button type="button" data-places="10000">10K</button>
-            <button type="button" data-places="100000">100K</button>
-            <button type="button" data-places="1000000">1M</button>
+          <div class="slider-wrap">
+            <input id="places" type="range" min="0" max="1000" value="571" class="slider">
           </div>
+          <div class="ticks" id="ticks"></div>
         </div>
 
         <div class="field">
-          <div class="field-head"><span>Alphabet</span><span class="hint" id="mode-hint"></span></div>
+          <div class="field-head"><span>Alphabet</span><span class="sub" id="mode-hint"></span></div>
           <div class="modes" id="modes" role="radiogroup">
+            <span class="modes-glider"></span>
             <button type="button" role="radio" data-mode="b26">Basis 26</button>
             <button type="button" role="radio" data-mode="pairs">Paare 01–26</button>
             <button type="button" role="radio" data-mode="digits">Ziffern A–J</button>
-            <span class="modes-glider"></span>
           </div>
+          <p class="note" id="mode-note"></p>
         </div>
       </div>
     </section>
 
     <section class="result" id="result">
-      <div class="verdict" id="verdict">
+      <div class="verdict">
         <div class="verdict-word" id="verdict-word"></div>
         <div class="verdict-text" id="verdict-text"></div>
+      </div>
+
+      <div class="scan" id="scan">
+        <div class="scan-bar"><span id="scan-fill"></span></div>
+        <div class="scan-info"><span id="scan-text"></span><span id="scan-rate"></span></div>
       </div>
 
       <div class="stats">
@@ -79,13 +87,13 @@
       </div>
     </section>
 
-    <section class="panel tape-panel">
+    <section class="panel">
       <div class="panel-head">
         <h2>Band</h2>
         <div class="tape-nav">
-          <button type="button" id="hit-prev" aria-label="Vorheriger Treffer">‹</button>
+          <button type="button" class="icon-btn" id="hit-prev" aria-label="Zurück">‹</button>
           <span id="hit-label">Stelle 1</span>
-          <button type="button" id="hit-next" aria-label="Nächster Treffer">›</button>
+          <button type="button" class="icon-btn" id="hit-next" aria-label="Weiter">›</button>
         </div>
       </div>
       <div class="tape" id="tape"></div>
@@ -100,7 +108,7 @@
       <section class="panel">
         <div class="panel-head">
           <h2>Galaxie</h2>
-          <span class="hint" id="galaxy-hint"></span>
+          <span class="sub" id="galaxy-hint"></span>
         </div>
         <div class="galaxy-wrap">
           <canvas id="galaxy" class="galaxy"></canvas>
@@ -110,8 +118,8 @@
 
       <section class="panel">
         <div class="panel-head">
-          <h2>Buchstabenverteilung</h2>
-          <span class="hint" id="freq-hint"></span>
+          <h2>Verteilung</h2>
+          <span class="sub" id="freq-hint"></span>
         </div>
         <div class="freq" id="freq"></div>
         <div class="freq-foot" id="freq-foot"></div>
@@ -121,27 +129,28 @@
     <section class="how">
       <h2>Drei Wege, π zu lesen</h2>
       <div class="how-grid">
-        <article class="card" data-mode="b26">
+        <article class="panel card" data-mode="b26">
           <div class="card-tag">Basis 26</div>
           <h3>3,DRSQLOLYRT…</h3>
-          <p>π wird direkt im 26er-System geschrieben. Jede „Ziffer“ ist ein Buchstabe von A (0) bis Z (25). Mathematisch die ehrlichste Variante: lückenlos und gleichverteilt.</p>
+          <p>π wird direkt im 26er-System geschrieben. Jede Stelle ist ein Buchstabe von A (0) bis Z (25). Die ehrlichste Variante: lückenlos und gleichverteilt.</p>
         </article>
-        <article class="card" data-mode="pairs">
+        <article class="panel card" data-mode="pairs">
           <div class="card-tag">Paare 01–26</div>
           <h3>14 15 92 65 → N O · ·</h3>
           <p>Die Nachkommastellen werden in Zweiergruppen gelesen. 01 bis 26 wird zu A bis Z, alles andere bleibt eine Lücke. Der Klassiker aus dem Matheunterricht.</p>
         </article>
-        <article class="card" data-mode="digits">
+        <article class="panel card" data-mode="digits">
           <div class="card-tag">Ziffern A–J</div>
           <h3>1 4 1 5 9 → B E B F J</h3>
-          <p>Jede einzelne Ziffer wird zu einem Buchstaben: 0 ist A, 9 ist J. Nur zehn Buchstaben, dafür findest du hier fast alles, was sich daraus bauen lässt.</p>
+          <p>Jede Ziffer wird zu einem Buchstaben: 0 ist A, 9 ist J. Nur zehn Buchstaben, dafür findest du fast alles, was sich daraus bauen lässt.</p>
         </article>
       </div>
     </section>
   </main>
 
   <footer class="foot">
-    <span>π berechnet mit dem Chudnovsky-Algorithmus · 1.000.000 Stellen · letzte Ziffern …5779458151</span>
+    <span class="foot-mark">0x701</span>
+    <span id="foot-text">π aus y-cruncher und dem Chudnovsky-Algorithmus</span>
   </footer>
 
   <script src="app.js" type="module"></script>
